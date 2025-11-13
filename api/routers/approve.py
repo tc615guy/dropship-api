@@ -1,15 +1,3 @@
-def approve_candidate(candidate_id: int, session: Session = Depends(get_session)):
-    candidate = session.get(Candidate, candidate_id)
-    if not candidate:
-        raise HTTPException(status_code=404, detail="Candidate not found")
-
-    supplier = find_supplier_for_candidate(candidate)
-    candidate.approved = True
-    session.add(candidate)
-    session.commit()
-    session.refresh(candidate)
-
-    return {"candidate": candidate, "supplier": supplier}
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
