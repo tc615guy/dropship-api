@@ -1,28 +1,25 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-from ..database import SessionLocal
-from ..models import Product
-from ..schemas import IngestRequest, ProductResponse
+from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/ingest",
     tags=["ingest"]
 )
 
+class IngestRequest(BaseModel):
+    domain: str
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+class IngestResponse(BaseModel):
+    ok: bool
+    message: str
 
+@router.post("/", response_model=IngestResponse)
+def ingest_candidate(payload: IngestRequest):
+    # In the future: call your scraper or harvesting script
+    # Example:
+    # subprocess.run(["python", "mvp.py", "--domain", payload.domain], check=True)
 
-@router.post("/", response_model=ProductResponse)
-def ingest_candidate(payload: IngestRequest, db: Session = Depends(get_db)):
-    product = Product(url=payload.domain, name=payload.domain)
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-    return product
+    return {
+        "ok": True,
+        "message": f"Ingest started for {payload.domain}"
+    }
